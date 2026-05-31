@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Asheville Landmarks Map</title>
+    <script src="https://polyfill.io/v3/polyfill.min.js?features=default"></script>
+    <script src="https://unpkg.com/@googlemaps/markerclusterer/dist/index.min.js"></script>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+        }
+        #map {
+            height: 100vh;
+            width: 100vw;
+        }
+        .info-window {
+            padding: 10px;
+            max-width: 300px;
+        }
+        .info-window h3 {
+            margin: 0 0 10px 0;
+            font-size: 16px;
+            color: #333;
+        }
+        .info-window p {
+            margin: 0 0 10px 0;
+            font-size: 14px;
+            color: #666;
+        }
+        .info-window a {
+            color: #1a73e8;
+            text-decoration: none;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <div id="map"></div>
+
+    <script>
+        const locations = [
+    {
+        "name": "Thomas Wolfe Memorial house (facing the hotel)",
+        "address": "52 N Market St, Asheville, NC 28801, USA",
+        "lat": 35.5975929,
+        "lng": -82.5512395
+    },
+    {
+        "name": "Urban trail marker: Thomas Wolfe's neighborhood (1900-1924)",
+        "address": "52 N Market St, Asheville, NC 28801, USA",
+        "lat": 35.5975929,
+        "lng": -82.5512395
+    },
+    {
+        "name": "Chicken Alley (1930-1950)",
+        "address": "8 Chicken Alley, Asheville, NC 28801, USA",
+        "lat": 35.5979003,
+        "lng": -82.5533191
+    },
+    {
+        "name": "Asheville Showcase (1960s)",
+        "address": "57 Broadway St, Asheville, NC 28801, USA",
+        "lat": 35.5972734,
+        "lng": -82.5525409
+    },
+    {
+        "name": "Moogseum",
+        "address": "56 Broadway St, Asheville, NC 28801, USA",
+        "lat": 35.5973126,
+        "lng": -82.5521351
+    },
+    {
+        "name": "Mellow Mushroom",
+        "address": "50 Broadway St, Asheville, NC 28801, USA",
+        "lat": 35.5968431,
+        "lng": -82.5519349
+    },
+    {
+        "name": "Blomberg Annex to Asheville Community Theatre (ACT) (1923)",
+        "address": "35 E Walnut St, Asheville, NC 28801, USA",
+        "lat": 35.5972285,
+        "lng": -82.5508232
+    },
+    {
+        "name": "Asheville Community Theatre (ACT) (1940-PRESENT)",
+        "address": "35 E Walnut St, Asheville, NC 28801, USA",
+        "lat": 35.5972285,
+        "lng": -82.5508232
+    },
+    {
+        "name": "Finklesteins Pawn Shop (1903-PRESENT)",
+        "address": "21 Broadway St, Asheville, NC 28801, USA",
+        "lat": 35.5960396,
+        "lng": -82.5523358
+    },
+    {
+        "name": "Black Mountain College Tribute Wall (1933-1957)",
+        "address": "5 W Walnut St, Asheville, NC 28801, USA",
+        "lat": 35.596672,
+        "lng": -82.5525429
+    },
+    {
+        "name": "Vanderbilt Shirt Factory (1950s)",
+        "address": "65 W Walnut St, Asheville, NC 28801, USA",
+        "lat": 35.5965455,
+        "lng": -82.5535234
+    },
+    {
+        "name": "Tops for Shoes (1950s-PRESENT)",
+        "address": "27 N Lexington Ave, Asheville, NC 28801, USA",
+        "lat": 35.59571460000001,
+        "lng": -82.5532655
+    },
+    {
+        "name": "Coleman Zageir and the Man's Store (1922-1962)",
+        "address": "22 Patton Ave, Asheville, NC 28801, USA",
+        "lat": 35.5947175,
+        "lng": -82.55277869999999
+    },
+    {
+        "name": "S and W Cafeteria (1929-1974)",
+        "address": "The S&W Building, 56 Patton Ave, Asheville, NC 28801, USA",
+        "lat": 35.5943974,
+        "lng": -82.55390249999999
+    },
+    {
+        "name": "Flatiron building",
+        "address": "20 Battery Park Ave, Asheville, NC 28801, USA",
+        "lat": 35.5950016,
+        "lng": -82.5551785
+    },
+    {
+        "name": "Pollock Crest",
+        "address": "39 Patton Ave, Asheville, NC 28801, USA",
+        "lat": 35.5949975,
+        "lng": -82.55335
+    },
+    {
+        "name": "Earth Guild",
+        "address": "33 Haywood St, Asheville, NC 28801, USA",
+        "lat": 35.5957,
+        "lng": -82.5545714
+    },
+    {
+        "name": "Urban Trail Marker to shoppers (1880-1990)",
+        "address": "55 Haywood St, Asheville, NC 28801, USA",
+        "lat": 35.5961409,
+        "lng": -82.5548546
+    },
+    {
+        "name": "Fine Arts theater (optional) (1947-1960s)",
+        "address": "36 Biltmore Ave, Asheville, NC 28801, USA",
+        "lat": 35.5935762,
+        "lng": -82.5509835
+    }
+];
+
+        function initMap() {
+            const map = new google.maps.Map(document.getElementById("map"), {
+                zoom: 15,
+                center: { lat: 35.5951, lng: -82.5515 }, // Centered on Asheville
+                mapTypeId: "roadmap",
+            });
+
+            const infoWindow = new google.maps.InfoWindow();
+            const markers = locations.map((loc) => {
+                if (loc.lat && loc.lng) {
+                    const marker = new google.maps.Marker({
+                        position: { lat: loc.lat, lng: loc.lng },
+                        title: loc.name,
+                    });
+
+                    marker.addListener("click", () => {
+                        const content = `
+                            <div class="info-window">
+                                <h3>${loc.name}</h3>
+                                <p>${loc.address}</p>
+                                <a href="https://www.google.com/maps/search/?api=1&query=${loc.lat},${loc.lng}" target="_blank">View on Google Maps</a>
+                            </div>
+                        `;
+                        infoWindow.setContent(content);
+                        infoWindow.open(map, marker);
+                    });
+
+                    return marker;
+                }
+                return null;
+            }).filter(m => m !== null);
+
+            new markerClusterer.MarkerClusterer({ map, markers });
+        }
+    </script>
+    <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyB9_MF2J2Lkb2WhL2-fwwRkfsobBJ0Clps&callback=initMap" async defer></script>
+</body>
+</html>
